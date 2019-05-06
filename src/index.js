@@ -3,9 +3,11 @@ import ReactDOM from "react-dom";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
+// Pages
 import Home from "./pages/home";
 import Detail from "./pages/detail";
 
+// History
 const history = createBrowserHistory();
 
 function App() {

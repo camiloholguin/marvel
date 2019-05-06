@@ -1,44 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import axios from "axios";
 
-import Grid from "./Grid";
+// Utils
+import { useFetchCharacters } from "../utils/useFetch";
 
-const key = "45ea1f18eed84810423471fc719c6a50";
+// Components
+import Character from "./Character";
 
 function Form() {
-  const [storage, setStorage] = useState(localStorage.getItem("marvel") || "");
-  const [query, setQuery] = useState(storage || "");
-  const [search, setSearch] = useState();
-  const [character, setCharacter] = useState();
-  const [isError, setIsError] = useState(false);
+  const [query, setQuery] = useState(window.localStorage.getItem("marvel") == null ? "" : window.localStorage.getItem("marvel"));
+  const [term, isError, isLoading] = useFetchCharacters({ term: query });
+  const inputSearch = useRef(null);
 
-  useEffect(() => {
-    const fetch = async () => {
-      setIsError(false);
-
-      if (query) {
-        try {
-          const result = await axios(
-            `https://gateway.marvel.com:443/v1/public/characters?name=${query}&apikey=${key}`
-          );
-
-          setCharacter(result.data);
-        } catch (error) {
-          setIsError(true);
-        }
-      }
-    };
-
-    setStorage(localStorage.setItem("marvel", query));
-
-    fetch();
-  }, [query]);
+  if (query) {
+    window.localStorage.setItem("marvel", query);
+  }
 
   const onSubmit = e => {
     e.preventDefault();
 
-    setQuery(search);
+    setQuery(inputSearch.current.value);
   };
 
   return (
@@ -47,7 +28,7 @@ function Form() {
         <Wrapper>
           <form onSubmit={e => onSubmit(e)}>
             <input
-              onChange={e => setSearch(e.target.value)}
+              ref={inputSearch}
               placeholder="Search"
               type="text"
             />
@@ -55,9 +36,10 @@ function Form() {
           </form>
         </Wrapper>
       </Main>
-      <Grid
-        character={character}
+      <Character
+        term={term}
         isError={isError}
+        isLoading={isLoading}
       />
     </React.Fragment>
   );
